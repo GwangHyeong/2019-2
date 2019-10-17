@@ -83,6 +83,22 @@ void loop() {
   server.handleClient();
 }
 ~~~~~~
+~~~~~~
+//index.h
+
+const char MAIN_page[] PROGMEM = R"=====(
+<HTML>
+  <HEAD>
+    <TITLE>My First Web Page</TITLE>
+  </HEAD>
+ <BODY>
+    <CENTER>
+        <B>HELOW </B>
+     </CENTER>
+  </BODY>
+  </HTML>
+  )=====";
+~~~~~~
 
 ## 중간고사 범위.  
 * 1. 클라우드 컴퓨팅의 개념.
