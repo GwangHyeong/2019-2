@@ -13,7 +13,7 @@
 클라우드 컴퓨팅 환경을 구축하는 데에 있어서 시스템 환경에 대한 의존성이 없고, 경량화를 통한 속도 및 이식성 향상을 추구하는 컨테이너 기반의 가상화 기법이 널리 활용되고 있다.  
 ##### 컨테이너 기반 기술이란? - 알아보기
 
-##클라우드 컴퓨팅 가항화 기술.
+## 클라우드 컴퓨팅 가상화 기술.
 ### 2.1 가상화 기술의 개요  
 * 가상화는 물리적인 컴퓨터 자원을 추상화 하며, 분산컴퓨팅 환경을 가능하게 함.  
 * 가상화는 물리적인 컴포넌트를 논리적인 객체로 추상화 하는 것을 의미.
@@ -36,3 +36,154 @@
 ### 1. sensor출력
 ### 2. sensor with OLED
 ### 3. WEB control
+
+* 저번시간에 했던 코드에 OLED 와 온습도 붙여서 사용.
+~~~~~~
+#include <ESP8266WiFi.h>
+#include <SSD1306.h>
+
+#include <DHT.h>
+#define DHTPIN D6
+#define DHTTYPE DHT11
+#include <WiFiClient.h>
+#include <ESP8266WebServer.h>
+
+DHT dht(DHTPIN, DHTTYPE);
+SSD1306 display(0x3c, D2, D1);
+
+
+
+const char MAIN_page[] PROGMEM = R"=====(
+
+<!doctype html>
+
+<html>
+
+<body>
+
+<h2>Dept of Smartmedia</h2>
+
+<h3>HTML Form ESP8266</h3>
+
+<form action="/action_page">
+
+Device name:<br>
+
+<input type="text" name="device" value="LED"><br>
+
+Control data:<br>
+
+<input type="text" name="number" value="On/Off number"><br>
+
+<input type="submit" name="Submit"><br>
+
+</body>
+
+</html>
+
+
+
+)=====";
+
+
+
+const char * ssid = "SMART324_3";
+const char * password = "76543210";
+
+ESP8266WebServer server(80);
+
+
+
+int ledPin=D0;
+int tones[] = {261, 294, 330, 349, 392, 440, 494, 523};
+int numTones = 8;
+
+void handleRoot(){
+
+  String s=MAIN_page;
+
+  server.send(200, "text/html",s);
+
+}
+
+void handleForm(){
+
+  String device = server.arg("device");
+  String number = server.arg("number");
+
+  Serial.print("Debice:");
+  Serial.println(device);
+
+
+  Serial.print("Number:");
+  Serial.println(number);
+  
+  Serial.print("num:");
+  Serial.println(number);
+
+  int num = number.toInt();
+
+
+
+    String s ="<a href='/'>Go Back</a>";
+
+    server.send(200,"text/html",s);
+
+    }
+
+  void setup(void){
+    dht.begin();
+    display.init();
+    display.flipScreenVertically();
+    display.clear();
+    display.display();
+    Serial.begin(115200);
+    WiFi.begin(ssid,password);
+    Serial.println("");
+    while(WiFi.status() != WL_CONNECTED){
+      delay(500);
+      Serial.print(".");
+    }
+  Serial.println("");
+  Serial.println("connected to");
+  Serial.println("WiFi");
+  Serial.println("IP address:");
+  Serial.print(WiFi.localIP());
+
+
+  server.on("/", handleRoot);
+
+  server.on("/action_page", handleForm);
+
+  server.begin();
+
+  Serial.println("HTTP server started");
+
+  }
+
+  void loop(void) {
+
+  server.handleClient();
+ float temp = dht.readTemperature();
+  float humidity = dht.readHumidity();
+
+  
+  Serial.print("Humidity:");
+  Serial.print(humidity);
+  Serial.print("Temperature:");
+  Serial.print(temp);
+  Serial.println("ºC");
+
+  display.clear();
+
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(0,20,"Temperature:");
+  display.drawString(65,20,String(temp)+String("C"));
+  display.drawString(0,40,"Humidity:");
+  display.drawString(55,40,String(humidity)+String("%"));
+  display.display();
+
+
+  }
+~~~~~~
